@@ -1,0 +1,85 @@
+[package]
+name = "sleeplm"
+version = "0.0.1"
+edition = "2021"
+description = "SleepLM Sleep-Language Foundation Model — inference in Rust with Burn ML"
+keywords      = ["sleep", "polysomnography", "eeg", "ecg", "GPU", "CPU"]
+categories    = ["science", "mathematics"]
+authors       = ["Nataliya Kosmyna"]
+repository    = "https://github.com/nataliyakosmyna/sleeplm"
+license       = "MIT"
+readme        = "README.md"
+
+exclude = [
+    "data/",
+    "scripts/",
+    "tests/vectors/",
+]
+
+[lib]
+name = "sleeplm"
+path = "src/lib.rs"
+
+[[bin]]
+name = "infer"
+path = "src/bin/infer.rs"
+
+[[bin]]
+name = "download_weights"
+path = "src/bin/download_weights.rs"
+required-features = ["hf-download"]
+
+[[bin]]
+name = "gen_sample_psg"
+path = "src/bin/gen_sample_psg.rs"
+
+[[bin]]
+name = "bench"
+path = "src/bin/bench.rs"
+
+[[bin]]
+name = "convert_weights"
+path = "src/bin/convert_weights.rs"
+
+[[example]]
+name = "embed"
+path = "examples/embed.rs"
+
+[[example]]
+name = "caption"
+path = "examples/caption.rs"
+
+[features]
+default = ["ndarray", "blas-accelerate"]
+
+# ── CPU backends ─────────────────────────────────────────────────────────────
+ndarray         = ["dep:burn-ndarray", "burn/ndarray"]
+blas-accelerate = ["burn-ndarray?/blas-accelerate"]
+openblas-system = ["burn-ndarray?/blas-openblas-system"]
+
+# ── GPU backend ──────────────────────────────────────────────────────────────
+wgpu            = ["burn/wgpu"]
+metal           = ["wgpu", "burn-wgpu/metal"]
+vulkan          = ["wgpu", "burn-wgpu/vulkan"]
+
+# ── Utilities ────────────────────────────────────────────────────────────────
+hf-download     = ["dep:hf-hub"]
+
+[dependencies]
+burn = { version = "0.20.1", default-features = false, features = ["std", "simd"] }
+burn-ndarray = { version = "0.20.1", default-features = false, features = ["std", "simd", "multi-threads"], optional = true }
+burn-wgpu = { version = "0.20.1", default-features = true, optional = true }
+
+safetensors = "0.7"
+half = { version = "2", features = ["bytemuck"] }
+clap = { version = "4", features = ["derive", "env"] }
+serde      = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1.0"
+bytemuck = { version = "1", features = ["derive"] }
+hf-hub = { version = "0.5", default-features = false, features = ["ureq"], optional = true }
+
+[profile.release]
+opt-level = 3
+# lto = "thin"      # disabled: makes wgpu builds take 3+ min
+# codegen-units = 1 # disabled: same reason
