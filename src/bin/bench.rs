@@ -16,7 +16,6 @@ struct Args {
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
     let run_cpu = args.backend == "all" || args.backend == "cpu";
-    let run_gpu = args.backend == "all" || args.backend == "gpu";
 
     println!("backend,component,batch,warmup,iters,mean_ms,std_ms,min_ms,max_ms");
 
@@ -29,11 +28,14 @@ fn main() -> anyhow::Result<()> {
     }
 
     #[cfg(feature = "wgpu")]
-    if run_gpu {
-        run_bench::<burn::backend::Wgpu>(
-            "GPU-Metal",
-            &burn::backend::wgpu::WgpuDevice::DefaultDevice,
-        )?;
+    {
+        let run_gpu = args.backend == "all" || args.backend == "gpu";
+        if run_gpu {
+            run_bench::<burn::backend::Wgpu>(
+                "GPU-Metal",
+                &burn::backend::wgpu::WgpuDevice::DefaultDevice,
+            )?;
+        }
     }
 
     Ok(())
