@@ -50,7 +50,7 @@ fn run_bench<B: burn::prelude::Backend>(
     use sleeplm::model::sleeplm::SleepLM;
 
     let cfg: ModelConfig = serde_json::from_str(include_str!(
-        "../../data/sleep_coca_base_dualtransformer.json"
+        "../../../../../data/sleep_coca_base_dualtransformer.json"
     ))?;
 
     eprintln!("[{name}] building model…");
